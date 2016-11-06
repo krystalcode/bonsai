@@ -18,6 +18,22 @@ class Repository implements RepositoryInterface {
   private $apiKey;
   private $transformer;
 
+  /**
+   * @Issue(
+   *   "Make the EventDispatcher and the MessageTransformer optional and do not
+   *   perform related operations if they are not provided"
+   *   type="improvement"
+   *   priority="normal"
+   *   labels="api, 1.0.0"
+   * )
+   * @Issue(
+   *   "Add a Message class and return the messages in that format if they are
+   *   not transformed"
+   *   type="improvement"
+   *   priority="normal"
+   *   labels="api, 1.0.0"
+   * )
+   */
   public function __construct($mailgun, $dispatcher, $apiKey, MessageTransformerInterface $transformer) {
     $this->mailgun     = $mailgun;
     $this->dispatcher  = $dispatcher;
