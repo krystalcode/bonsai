@@ -41,6 +41,14 @@ class Repository implements RepositoryInterface {
     $this->transformer = $transformer;
   }
 
+  /**
+   * @Issue(
+   *   "Implement scrolling/pagination for fetching large number of events"
+   *   type="bug"
+   *   priority="normal"
+   *   labels="api, 1.0.0"
+   * )
+   */
   public function getList(array $options = []) {
     if (empty($options['domain'])) {
       throw new \Exception('The domain for which to retrieve the list of messages must be provided.');
