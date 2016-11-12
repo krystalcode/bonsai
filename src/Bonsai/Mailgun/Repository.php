@@ -104,7 +104,9 @@ class Repository implements RepositoryInterface {
       $messages[] = $this->getOne($event->storage->url, $message_options);
     }
 
-    return $messages;
+    // Filter the results for empty values. This can happen for messages that are
+    // older than 3 days and they are not available anymore.
+    return array_filter($messages);
   }
 
   public function getOne($url, array $options = []) {
@@ -125,7 +127,7 @@ class Repository implements RepositoryInterface {
     // deleted from the Mailgun servers and it cannot be retrieved any
     // longer. Mailgun only keeps messages stored for up to 3 days.
     catch (MissingEndpoint $e) {
-      return;
+      return FALSE;
     }
 
     $message = $response->http_response_body;
