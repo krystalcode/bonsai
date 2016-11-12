@@ -3,5 +3,5 @@
 namespace Bonsai;
 
 interface MessageTransformerInterface {
-  public function transform($message);
+  public function transform($message, array $options = []);
 }

@@ -6,6 +6,7 @@ namespace Bonsai\Mailgun;
 use Http\Client\HttpClient;
 use Mailgun\Connection\Exceptions\MissingEndpoint;
 use Mailgun\Mailgun;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 // Internal dependencies.
 use Bonsai\MessageTransformerInterface;
@@ -34,7 +35,12 @@ class Repository implements RepositoryInterface {
    *   labels="api, 1.0.0"
    * )
    */
-  public function __construct($mailgun, $dispatcher, $apiKey, MessageTransformerInterface $transformer) {
+  public function __construct(
+    $mailgun,
+    $apiKey,
+    EventDispatcher $dispatcher = NULL,
+    MessageTransformerInterface $transformer = NULL
+  ) {
     $this->mailgun     = $mailgun;
     $this->dispatcher  = $dispatcher;
     $this->apiKey      = $apiKey;
@@ -79,22 +85,28 @@ class Repository implements RepositoryInterface {
     // Allow the application to alter the events for which we will be retrieving
     // the messages. This can be useful to allow filtering out the messages that
     // have already been processed.
-    $event = new EventsRetrievedEvent($events);
-    $this->dispatcher->dispatch(EventsRetrievedEvent::NAME, $event);
+    if ($this->dispatcher) {
+      $event = new EventsRetrievedEvent($events);
+      $this->dispatcher->dispatch(EventsRetrievedEvent::NAME, $event);
+    }
 
     if (empty($events->items)) {
       return [];
     }
 
     $messages = [];
+    $message_options = [];
+    if (!empty($options['transformer_options'])) {
+        $message_options['transformer_options'] = $options['transformer_options'];
+    }
     foreach ($events->items as $event) {
-      $messages[] = $this->getOne($event->storage->url);
+      $messages[] = $this->getOne($event->storage->url, $message_options);
     }
 
     return $messages;
   }
 
-  public function getOne($url) {
+  public function getOne($url, array $options = []) {
     $urlParts = explode('/', $url);
 
     $protocol    = array_shift($urlParts);
@@ -117,6 +129,14 @@ class Repository implements RepositoryInterface {
 
     $message = $response->http_response_body;
 
-    return $this->transformer->transform($message);
+    if ($this->transformer) {
+        $transformer_options = [];
+        if (!empty($options['transformer_options'])) {
+            $transformer_options['transformer_options'] = $options['transformer_options'];
+        }
+        return $this->transformer->transform($message, $transformer_options);
+    }
+
+    return $message;
   }
 }
