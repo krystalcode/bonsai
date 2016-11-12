@@ -56,13 +56,14 @@ class Repository implements RepositoryInterface {
    * )
    */
   public function getList(array $options = []) {
+    $options = array_merge(['event_type' => 'stored'], $options);
     if (empty($options['domain'])) {
       throw new \Exception('The domain for which to retrieve the list of messages must be provided.');
     }
 
     $domain = $options['domain'];
 
-    $params = ['event' => 'stored'];
+    $params = ['event' => $options['event_type']];
 
     if (!empty($options['time_range'])) {
       $now             = now();
