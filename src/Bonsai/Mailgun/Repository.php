@@ -63,7 +63,10 @@ class Repository implements RepositoryInterface {
 
     $domain = $options['domain'];
 
-    $params = ['event' => $options['event_type']];
+    $params = [];
+    if ($options['event_type']) {
+      $params['event'] = $options['event_type'];
+    }
 
     if (!empty($options['time_range'])) {
       $now             = now();
