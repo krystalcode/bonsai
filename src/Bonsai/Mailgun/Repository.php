@@ -3,6 +3,7 @@
 namespace Bonsai\Mailgun;
 
 // External dependencies;
+use GuzzleHttp\Exception\ConnectException;
 use Http\Client\HttpClient;
 use Mailgun\Connection\Exceptions\MissingEndpoint;
 use Mailgun\Mailgun;
@@ -131,6 +132,19 @@ class Repository implements RepositoryInterface {
     // longer. Mailgun only keeps messages stored for up to 3 days.
     catch (MissingEndpoint $e) {
       return FALSE;
+    }
+    // If there is a connection problem, proceed without throwing an exception.
+    // The message should still be processed next time around.
+    /**
+     * @Issue(
+     *   "Log errors when not being able to connect to the Mailgun API"
+     *   type="improvement"
+     *   priority="normal"
+     *   labels="error management, log management"
+     * )
+     */
+    catch (ConnectException $e) {
+        return FALSE;
     }
 
     $message = $response->http_response_body;
