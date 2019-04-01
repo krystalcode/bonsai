@@ -111,6 +111,9 @@ class Repository implements RepositoryInterface {
     if (!empty($options['transformer_options'])) {
         $message_options['transformer_options'] = $options['transformer_options'];
     }
+    if (!empty($options['include_raw'])) {
+        $message_options['include_raw'] = $options['include_raw'];
+    }
     foreach ($events->items as $event) {
       $messages[] = $this->getOne($event->storage->url, $message_options);
     }
@@ -155,6 +158,26 @@ class Repository implements RepositoryInterface {
     }
 
     $message = $response->http_response_body;
+
+    // Include the raw data in the message, if requested.
+    /**
+     * @Issue(
+     *   "Store remote message info such as provider, event ID, message URL etc"
+     *   type="feature"
+     *   priority="normal"
+     */
+    if (!empty($options['include_raw'])) {
+        $response = $mailgun->get(
+            $endpointUrl,
+            [],
+            ['Accept' => 'message/rfc2822']
+        );
+        if ($response->http_response_code === 200) {
+            $message->bonsai = [
+                'raw' => json_encode($response->http_response_body),
+            ];
+        }
+    }
 
     if ($this->transformer) {
         $transformer_options = [];
