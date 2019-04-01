@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ConnectException;
 use Http\Client\HttpClient;
 use Mailgun\Connection\Exceptions\MissingEndpoint;
 use Mailgun\Mailgun;
+use Mailgun\Constants\Api as Sdk;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 // Internal dependencies.
@@ -46,6 +47,12 @@ class Repository implements RepositoryInterface {
     $this->dispatcher  = $dispatcher;
     $this->apiKey      = $apiKey;
     $this->transformer = $transformer;
+
+    // Strangely, in SDK v2 the default Mailgun API version is set to 2 and
+    // things do not work. Manually set it to 3.
+    if ($this->sdkMajorVersion() === '2') {
+      $this->mailgun->setApiVersion('v3');
+    }
   }
 
   /**
@@ -122,7 +129,7 @@ class Repository implements RepositoryInterface {
     $apiVersion  = array_shift($urlParts);
     $endpointUrl = implode('/', $urlParts);
 
-    $mailgun = new Mailgun($this->apiKey, $apiHost, $apiVersion);
+    $mailgun = $this->getMailgun($apiHost, $apiVersion);
 
     try {
       $response = $mailgun->get($endpointUrl);
@@ -158,5 +165,24 @@ class Repository implements RepositoryInterface {
     }
 
     return $message;
+  }
+
+  protected function getMailgun($apiHost, $apiVersion) {
+    switch ($this->sdkMajorVersion()) {
+      case '1':
+        return new Mailgun($this->apiKey, $apiHost, $apiVersion);
+
+      case '2':
+        $mailgun = new Mailgun($this->apiKey, null, $apiHost);
+        $mailgun->setApiVersion($apiVersion);
+        return $mailgun;
+
+      default:
+        throw new \Exception('Unsupported version of Mailgun SDK.');
+    }
+  }
+
+  protected function sdkMajorVersion() {
+    return substr(Sdk::SDK_VERSION, 0, 1);
   }
 }
