@@ -87,6 +87,13 @@ class Repository implements RepositoryInterface {
     }
 
     // Get the events.
+    /*
+     * @Issue(
+     *   "Use the SDK's Event API to feth events"
+     *   type="task"
+     *   priority="normal"
+     * )
+     */
     $response = $this->mailgun->get("$domain/events", $params);
     $events = $response->http_response_body;
 
@@ -135,6 +142,13 @@ class Repository implements RepositoryInterface {
     $mailgun = $this->getMailgun($apiHost, $apiVersion);
 
     try {
+      /*
+       * @Issue(
+       *   "Use the SDK's Message API to feth messages"
+       *   type="task"
+       *   priority="normal"
+       * )
+       */
       $response = $mailgun->get($endpointUrl);
     }
     // If Mailgun throws a MissingEndpoint exception, the messages has been
