@@ -61,7 +61,6 @@ class EventRepository implements EventRepositoryInterface {
    * )
    */
   public function getList(array $options = []) {
-    //$options = array_merge(['event_type' => 'stored'], $options);
     if (empty($options['domain'])) {
       throw new \Exception('The domain for which to retrieve the list of events must be provided.');
     }
