@@ -9,8 +9,17 @@
             "name": "Dimitris Bozelos"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/krystalcode/mailgun-php.git"
+        }
+    ],
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "kriswallsmith/buzz"    : "^1.0",
+        "mailgun/mailgun-php"   : "dev-2.8.1-headers",
+        "guzzlehttp/psr7"       : "^1.6"
     },
     "autoload": {
         "psr-4": {
