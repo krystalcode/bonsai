@@ -3,6 +3,7 @@
 namespace Bonsai\Mailgun;
 
 // External dependencies;
+use Mailgun\Constants\Api as Sdk;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 // Internal dependencies.
@@ -43,6 +44,12 @@ class EventRepository implements EventRepositoryInterface {
     $this->apiKey      = $apiKey;
 
     $this->eventTransformer = $eventTransformer;
+
+    // Strangely, in SDK v2 the default Mailgun API version is set to 2 and
+    // things do not work. Manually set it to 3.
+    if ($this->sdkMajorVersion() === '2') {
+      $this->mailgun->setApiVersion('v3');
+    }
   }
 
   /**
@@ -110,5 +117,9 @@ class EventRepository implements EventRepositoryInterface {
     }
 
     return $transformed_events;
+  }
+
+  protected function sdkMajorVersion() {
+    return substr(Sdk::SDK_VERSION, 0, 1);
   }
 }
