@@ -181,15 +181,23 @@ class Repository implements RepositoryInterface {
      *   priority="normal"
      */
     if (!empty($options['include_raw'])) {
-        $response = $mailgun->get(
-            $endpointUrl,
-            [],
-            ['Accept' => 'message/rfc2822']
-        );
-        if ($response->http_response_code === 200) {
-            $message->bonsai = [
-                'raw' => json_encode($response->http_response_body),
-            ];
+        try {
+            $response = $mailgun->get(
+                $endpointUrl,
+                [],
+                ['Accept' => 'message/rfc2822']
+            );
+            if ($response->http_response_code === 200) {
+                $message->bonsai = [
+                    'raw' => json_encode($response->http_response_body),
+                ];
+            }
+        }
+        catch (\Exception $e) {
+            // In some very rare cases we have been consistently getting an
+            // exception on the request to include the raw message; probably an
+            // internal Mailgun issue. Catch the exception in that case so that
+            // the message is processed even without the raw data.
         }
     }
 
